@@ -32,8 +32,9 @@ class TagResolveListener implements Listener{
         }
 
         if ($tags[1] == "time") {
-            $value = $this->plugin->Format($this->plugin->getPlayerTime($player));
+            $value = $this->plugin->getPlayerTimeFormat($player);
         }
+        
         $tag->setValue(($value));
     }
 }

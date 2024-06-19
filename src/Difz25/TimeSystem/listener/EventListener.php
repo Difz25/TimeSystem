@@ -26,7 +26,7 @@ class EventListener implements Listener{
 
     private function sendTags(Player $player): void{
         (new PlayerTagsUpdateEvent($player, [
-            new ScoreTag("timesystem.time", $this->plugin->Format($this->plugin->getPlayerTime($player)))
+            new ScoreTag("timesystem.time", $this->plugin->getPlayerTimeFormat($player))
         ]))->call();
     }
 }

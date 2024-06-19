@@ -12,80 +12,106 @@ use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
 use pocketmine\utils\Config;
 
-class TimeSystem extends PluginBase implements Listener{
+class TimeSystem extends PluginBase implements Listener {
 
     private static TimeSystem $instance;
-    public Config $time;
 
     public function onEnable(): void {
-        $player = Player::class;
-        $this->time = new Config($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml", Config::YAML, [
-            "Time" => 0,
-        ]);
-        
         $this->getServer()->getPluginManager()->registerEvents(new EventListener($this), $this);
         $this->getServer()->getPluginManager()->registerEvents(new TagResolveListener($this), $this);
     }
     
     public function getPlayerConfig(string|Player $player): ?Config {
-        if ($player instanceof Player) {
             if (is_file($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml")) {
-                return new Config($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml", Config::YAML);
+                return new Config($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml", Config::YAML, [
+                    "Seconds" => 0,
+                    "Minutes" => 0,
+                    "Hours" => 0
+                ]);
             }
-        } else {
-            if (is_file($this->getDataFolder() . "players/" . strtolower($player) . ".yml")) {
-                return new Config($this->getDataFolder() . "players/" . strtolower($player) . ".yml", Config::YAML);
-            }
+            
+            return null;
+        }
+    
+    public function getPlayerTime(string|Player $player): bool {
+        if(($data = $this->getPlayerConfig($player)) !== null){
+            $seconds = $data->get("Seconds");
+            $minutes = $data->get("Minutes");
+            $hours = $data->get("Hours");
+            return $hours && $minutes && $seconds;
         }
         
-        return null;
+        return false;
     }
     
-    public function Format($number): string {
-        if(!is_numeric($number)) return '0:0:0';
-    	$format = number_format((int) $number, 0, ':', ':');
-    	return ':' . $format;
-	}
-    
-    public function getPlayerTime(string|Player $player): ?array {
+    public function getPlayerTimeFormat(string|Player $player): bool {
         if(($data = $this->getPlayerConfig($player)) !== null){
-            return $data->get("Time");
+            $seconds = $data->get("Seconds");
+            $minutes = $data->get("Minutes");
+            $hours = $data->get("Hours");
+            if($seconds == 60){
+                $data->set("Seconds", 0);
+                $minutes += 1;
+                $data->set("Minutes", $minutes);
+            }
+            if($minutes == 60){
+                $data->set("Minutes", 0);
+                $hours += 1;
+                $data->set("Hours", $hours);
+            }
+            $timeFormat = date($hours . ":" . $minutes . ":" . $seconds);
+            return number_format($timeFormat);
         }
         
-        return null;
+        return false;
     }
     
-    public function getAllPlayerTime(string|Player $player): ?array {
+    public function getAllPlayerTime(string|Player $player): bool {
         if(($data = $this->getPlayerConfig($player)) !== null){
-            return $data->get("Time") !== null ? $data->get("Time") : [];
+            $seconds = $data->get("Seconds");
+            $minutes = $data->get("Minutes");
+            $hours = $data->get("Hours");
+            return $hours && $minutes && $seconds;
         }
         
-        return null;
+        return false;
     }
 
     /**
      * @throws JsonException
      */
-    public function addPlayerTime(string|Player $player, int $amount): bool {
+    public function addPlayerTime(string|Player $player, int $hour, int $minute, int $second): bool {
         if (($data = $this->getPlayerConfig($player)) !== null){
-            $time = $data->get("Time");
-            $time += $amount;
-            $data->set("Time", $time);
+            $seconds = $data->get("Seconds");
+            $minutes = $data->get("Minutes");
+            $hours = $data->get("Hours");
+            $seconds += $second;
+            $data->set("Seconds", $seconds);
+            $minutes += $minute;
+            $data->set("Minutes", $minutes);
+            $hours += $hour;
+            $data->set("Hours", $hours);
             $data->save();
             return true;
         }
     
-    return false;
+        return false;
     }
 
     /**
      * @throws JsonException
      */
-    public function reducePlayerTime(string|Player $player, int $amount): bool {
+    public function reducePlayerTime(string|Player $player, int $hour, int $minute, int $second): bool {
         if (($data = $this->getPlayerConfig($player)) !== null) {
-            $time = $data->get("Time");
-            $time -= $amount;
-            $data->set("Time", $time);
+            $seconds = $data->get("Seconds");
+            $minutes = $data->get("Minutes");
+            $hours = $data->get("Hours");
+            $seconds -= $second;
+            $data->set("Seconds", $seconds);
+            $minutes -= $minute;
+            $data->set("Minutes", $minutes);
+            $hours -= $hour;
+            $data->set("Hours", $hours);
             $data->save();
             return true;
         }
@@ -99,9 +125,9 @@ class TimeSystem extends PluginBase implements Listener{
     public function onJoin(PlayerJoinEvent $event): bool {
         $player = $event->getPlayer();
         if (($data = $this->getPlayerConfig($player)) !== null){
-            $time = $data->get("Time");
-            $time += 1;
-            $data->set("Time", $time);
+            $seconds = $data->get("Seconds");
+            $seconds += 1;
+            $data->set("Seconds" , $seconds);
             $data->save();
             return true;
         }
