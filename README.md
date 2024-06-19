@@ -41,8 +41,8 @@ You can get player's thirst using the `getPlayerTime`  method. here's is an exam
 You can add player's thirst using the `addPlayerTime`  method. here's is an example:
 
 ```php
-    public function Example(string|Player $player, int $amount): void {
-        ThirstSystem::getInstance()->addPlayerTime($player, $amount);
+    public function Example(string|Player $player, int $hour, int $minute, int $second): void {
+        ThirstSystem::getInstance()->addPlayerTime($player, $hour, $minute, $second);
         $player->sendMessage("you're earned" . $amount);
     }
 ```
@@ -52,8 +52,8 @@ You can add player's thirst using the `addPlayerTime`  method. here's is an exam
 You can reduce player's thirst using the `reducePlayerTime`  method. here's is an example:
 
 ```php
-    public function Example(string|Player $player, int $amount): void {
-        ThirstSystem::getInstance()->reducePlayerTime($player, $amount);
+    public function Example(string|Player $player, int $hour, int $minute, int $second): void {
+        ThirstSystem::getInstance()->reducePlayerTime($player, $hour, $minute, $second);
         $player->sendMessage("you're thirst reduce to " $amount);
     }
 ```
