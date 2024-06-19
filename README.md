@@ -29,9 +29,9 @@ You can get player's thirst using the `getPlayerTime`  method. here's is an exam
 
 ```php
     public function Example(string|Player $player): void {
-        $time = ThirstSystem::getInstance()->getPlayerTime($player);
+        $time = TimeSystem::getInstance()->getPlayerTime($player);
         if($time < 0){
-            $player->sendMessage("you thirst is " . $time);
+            $player->sendMessage("you time is " . $time);
         }
     }
 ```
@@ -42,8 +42,8 @@ You can add player's thirst using the `addPlayerTime`  method. here's is an exam
 
 ```php
     public function Example(string|Player $player, int $hour, int $minute, int $second): void {
-        ThirstSystem::getInstance()->addPlayerTime($player, $hour, $minute, $second);
-        $player->sendMessage("you're earned" . $amount);
+        TimeSystem::getInstance()->addPlayerTime($player, $hour, $minute, $second);
+        $player->sendMessage("you're time add" . $amount);
     }
 ```
 
@@ -53,8 +53,8 @@ You can reduce player's thirst using the `reducePlayerTime`  method. here's is a
 
 ```php
     public function Example(string|Player $player, int $hour, int $minute, int $second): void {
-        ThirstSystem::getInstance()->reducePlayerTime($player, $hour, $minute, $second);
-        $player->sendMessage("you're thirst reduce to " $amount);
+        TimeSystem:getInstance()->reducePlayerTime($player, $hour, $minute, $second);
+        $player->sendMessage("you're time reduce to " $amount);
     }
 ```
 
@@ -64,7 +64,7 @@ You can reduce player's thirst using the `getAllPlayerTime`  method. here's is a
 
 ```php
     public function Example(string|Player $player, int $amount): void {
-        ThirstSystem::getInstance()->getAllPlayerTime($player);
+        TimeSystem::getInstance()->getAllPlayerTime($player);
         $player->sendMessage("you all time is " . $amount);
     }
 ```
