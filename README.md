@@ -30,9 +30,7 @@ You can get player's thirst using the `getPlayerTime`  method. here's is an exam
 ```php
     public function Example(string|Player $player): void {
         $time = TimeSystem::getInstance()->getPlayerTime($player);
-        if($time < 0){
             $player->sendMessage("you time is " . $time);
-        }
     }
 ```
 
