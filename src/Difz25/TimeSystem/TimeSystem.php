@@ -7,6 +7,7 @@ use Difz25\TimeSystem\listener\TagResolveListener;
 use JsonException;
 use pocketmine\event\Listener;
 use pocketmine\event\player\PlayerJoinEvent;
+use pocketmine\event\player\PlayerLoginEvent;
 use pocketmine\event\player\PlayerQuitEvent;
 use pocketmine\player\Player;
 use pocketmine\plugin\PluginBase;
@@ -21,24 +22,28 @@ class TimeSystem extends PluginBase implements Listener {
         $this->getServer()->getPluginManager()->registerEvents(new TagResolveListener($this), $this);
     }
     
-    public function getPlayerConfig(string|Player $player): ?Config {
-            if (is_file($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml")) {
-                return new Config($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml", Config::YAML, [
+    public function getPlayerConfig(string|Player $player): Config {
+        if (!is_file($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml")) {
+            return new Config($this->getDataFolder() . "players/" . strtolower($player->getName()) . ".yml", Config::YAML, [
                     "Seconds" => 0,
                     "Minutes" => 0,
                     "Hours" => 0
-                ]);
-            }
-            
-            return null;
+            ]);
+        } else {   
+            return new Config($this->getDataFolder() . "players/" . strtolower($player) . ".yml", Config::YAML, [
+                    "Seconds" => 0,
+                    "Minutes" => 0,
+                    "Hours" => 0
+            ]);
         }
+    }
     
     public function getPlayerTime(string|Player $player): bool {
         if(($data = $this->getPlayerConfig($player)) !== null){
             $seconds = $data->get("Seconds");
             $minutes = $data->get("Minutes");
             $hours = $data->get("Hours");
-            return $hours && $minutes && $seconds;
+            return $hours . $minutes . $seconds;
         }
         
         return false;
@@ -71,7 +76,7 @@ class TimeSystem extends PluginBase implements Listener {
             $seconds = $data->get("Seconds");
             $minutes = $data->get("Minutes");
             $hours = $data->get("Hours");
-            return $hours && $minutes && $seconds;
+            return $hours . $minutes . $seconds;
         }
         
         return false;
@@ -124,12 +129,32 @@ class TimeSystem extends PluginBase implements Listener {
      */
     public function onJoin(PlayerJoinEvent $event): bool {
         $player = $event->getPlayer();
-        if (($data = $this->getPlayerConfig($player)) !== null){
-            $seconds = $data->get("Seconds");
-            $seconds += 1;
-            $data->set("Seconds" , $seconds);
-            $data->save();
-            return true;
+        if($player->isOnline()){
+            if (($data = $this->getPlayerConfig($player)) !== null){
+                $seconds = $data->get("Seconds");
+                $seconds += 1;
+                $data->set("Seconds" , $seconds);
+                $data->save();
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+    /**
+     * @throws JsonException
+     */
+    public function onLogin(PlayerLoginEvent $event): bool {
+        $p = $event->getPlayer();
+        if($p->isOnline()){
+            if (($data = $this->getPlayerConfig($p)) !== null){
+                $seconds = $data->get("Seconds");
+                $seconds += 1;
+                $data->set("Seconds" , $seconds);
+                $data->save();
+                return true;
+            }
         }
         
         return false;
@@ -140,10 +165,12 @@ class TimeSystem extends PluginBase implements Listener {
      */
     public function onQuit(PlayerQuitEvent $event): bool {
         $player = $event->getPlayer();
-        if (($data = $this->getPlayerConfig($player)) !== null){
-            $data->reload();
-            $data->save();
-            return true;
+        if(!$player->isOnline()){
+            if (($data = $this->getPlayerConfig($player)) !== null){
+                $data->reload();
+                $data->save();
+                return true;
+            }
         }
         
         return false;
